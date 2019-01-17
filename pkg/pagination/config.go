@@ -6,8 +6,8 @@ const DefaultKeyPerPage = "per_page"
 type Config struct {
 	KeyPage    string
 	KeyPerPage string
-	Page       int
-	PerPage    int
+	Page       uint
+	PerPage    uint
 }
 
 func (c Config) keyPage() string {
@@ -26,7 +26,7 @@ func (c Config) keyPerPage() string {
 	return c.KeyPerPage
 }
 
-func (c Config) page() int {
+func (c Config) page() uint {
 	if c.Page == 0 {
 		return 1
 	}
@@ -34,6 +34,6 @@ func (c Config) page() int {
 	return c.Page
 }
 
-func (c Config) perPage() int {
+func (c Config) perPage() uint {
 	return c.PerPage
 }

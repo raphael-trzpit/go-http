@@ -20,7 +20,7 @@ func (p Paginator) FromRequest(r *http.Request) Pagination {
 
 func (p Paginator) FromValues(v url.Values) Pagination {
 	return Pagination{
-		page: p.getPage(v),
+		page:    p.getPage(v),
 		perPage: p.getPerPage(v),
 	}
 }
@@ -33,22 +33,20 @@ func (p Paginator) ParsingMiddleware(h http.Handler) http.Handler {
 	})
 }
 
-func (p Paginator) getPage(v url.Values) int {
+func (p Paginator) getPage(v url.Values) uint {
 	page, err := strconv.Atoi(v.Get(p.config.keyPage()))
 	if err != nil {
 		return p.config.page()
 	}
 
-	return page
+	return uint(page)
 }
 
-func (p Paginator) getPerPage(v url.Values) int {
+func (p Paginator) getPerPage(v url.Values) uint {
 	perPage, err := strconv.Atoi(v.Get(p.config.keyPerPage()))
-	if err != nil {
+	if err != nil || perPage < 0 {
 		return p.config.perPage()
 	}
 
-	return perPage
+	return uint(perPage)
 }
-
-

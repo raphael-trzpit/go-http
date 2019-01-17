@@ -5,26 +5,26 @@ import (
 )
 
 type Pagination struct {
-	page    int
-	perPage int
+	page    uint
+	perPage uint
 }
 
-func (p Pagination) Page() int {
+func (p Pagination) Page() uint {
 	return p.page
 }
 
-func (p Pagination) PerPage() int {
+func (p Pagination) PerPage() uint {
 	return p.perPage
 }
 
-func (p Pagination) Offset() int {
+func (p Pagination) Offset() uint {
 	if p.page == 0 {
 		return 0
 	}
 	return (p.page - 1) * p.perPage
 }
 
-func (p Pagination) Limit() int {
+func (p Pagination) Limit() uint {
 	return p.page * p.perPage
 }
 
