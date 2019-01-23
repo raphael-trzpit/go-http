@@ -24,7 +24,7 @@ func ExampleFromContext() {
 	})
 
 	// Use the paginator middleware
-	paginator.ParsingMiddleware(handler).ServeHTTP(
+	paginator.Middleware(handler).ServeHTTP(
 		httptest.NewRecorder(),
 		httptest.NewRequest(
 			http.MethodGet,
@@ -40,36 +40,36 @@ func ExampleFromContext() {
 	// limit 80
 }
 
-func TestPaginator_ParsingMiddleware(t *testing.T) {
+func TestPaginator_Middleware(t *testing.T) {
 	tests := []struct {
 		name               string
 		config             Config
 		target             string
-		expectedPagination Pagination
+		expectedPagination *Pagination
 	}{
 		{
 			name:               "Default config without params",
 			config:             Config{},
 			target:             "http://host.com/page",
-			expectedPagination: Pagination{page: 1, perPage: 0},
+			expectedPagination: &Pagination{page: 1, perPage: 0},
 		},
 		{
 			name:               "Default config with params",
 			config:             Config{},
 			target:             "http://host.com/page?page=2&per_page=15",
-			expectedPagination: Pagination{page: 2, perPage: 15},
+			expectedPagination: &Pagination{page: 2, perPage: 15},
 		},
 		{
 			name:               "Custom config without params",
 			config:             Config{KeyPage: "customPage", KeyPerPage: "customPerPage", Page: 2, PerPage: 20},
 			target:             "http://host.com/page?page=3&per_page=15",
-			expectedPagination: Pagination{page: 2, perPage: 20},
+			expectedPagination: &Pagination{page: 2, perPage: 20},
 		},
 		{
 			name:               "Custom config with params",
 			config:             Config{KeyPage: "customPage", KeyPerPage: "customPerPage", Page: 2, PerPage: 20},
 			target:             "http://host.com/page?page=2&per_page=15&customPage=3&customPerPage=30",
-			expectedPagination: Pagination{page: 3, perPage: 30},
+			expectedPagination: &Pagination{page: 3, perPage: 30},
 		},
 	}
 
@@ -83,7 +83,7 @@ func TestPaginator_ParsingMiddleware(t *testing.T) {
 			})
 
 			// Use the paginator middleware
-			paginator.ParsingMiddleware(handler).ServeHTTP(
+			paginator.Middleware(handler).ServeHTTP(
 				httptest.NewRecorder(),
 				httptest.NewRequest(http.MethodGet, test.target, strings.NewReader("")),
 			)

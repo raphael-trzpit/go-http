@@ -14,18 +14,18 @@ func NewPaginator(config Config) Paginator {
 	return Paginator{config: config}
 }
 
-func (p Paginator) FromRequest(r *http.Request) Pagination {
+func (p Paginator) FromRequest(r *http.Request) *Pagination {
 	return p.FromValues(r.URL.Query())
 }
 
-func (p Paginator) FromValues(v url.Values) Pagination {
-	return Pagination{
+func (p Paginator) FromValues(v url.Values) *Pagination {
+	return &Pagination{
 		page:    p.getPage(v),
 		perPage: p.getPerPage(v),
 	}
 }
 
-func (p Paginator) ParsingMiddleware(h http.Handler) http.Handler {
+func (p Paginator) Middleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		newContext := NewContext(r.Context(), p.FromRequest(r))
 
