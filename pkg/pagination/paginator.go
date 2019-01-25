@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type Paginator struct {
@@ -27,9 +28,18 @@ func (p Paginator) FromValues(v url.Values) *Pagination {
 
 func (p Paginator) Middleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		newContext := NewContext(r.Context(), p.FromRequest(r))
+		pagination := p.FromRequest(r)
 
-		h.ServeHTTP(w, r.WithContext(newContext))
+		h.ServeHTTP(w, r.WithContext(NewContext(r.Context(), pagination)))
+
+		urlRequested := r.URL
+		linkHeader := make([]string, 0)
+		for _, link := range pagination.GetLinks() {
+			urlRequested.Query().Set(p.config.KeyPage, string(link.page))
+			urlRequested.Query().Set(p.config.KeyPerPage, string(link.perPage))
+			linkHeader = append(linkHeader, "<"+urlRequested.String()+"> rel=\""+link.rel.String()+"\"")
+		}
+		w.Header().Set("Link", strings.Join(linkHeader, ", "))
 	})
 }
 
@@ -44,7 +54,7 @@ func (p Paginator) getPage(v url.Values) uint {
 
 func (p Paginator) getPerPage(v url.Values) uint {
 	perPage, err := strconv.Atoi(v.Get(p.config.keyPerPage()))
-	if err != nil || perPage < 0 {
+	if err != nil || perPage <= 0 {
 		return p.config.perPage()
 	}
 

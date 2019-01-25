@@ -17,6 +17,7 @@ func ExampleFromContext() {
 	// Out HTTP handler that will retrieve the pagination
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		pagination, _ := FromContext(r.Context())
+		pagination.SetTotalCount(119)
 		fmt.Println("page", pagination.Page())
 		fmt.Println("perPage", pagination.PerPage())
 		fmt.Println("offset", pagination.Offset())
@@ -24,20 +25,24 @@ func ExampleFromContext() {
 	})
 
 	// Use the paginator middleware
+	recorder := httptest.NewRecorder()
 	paginator.Middleware(handler).ServeHTTP(
-		httptest.NewRecorder(),
+		recorder,
 		httptest.NewRequest(
 			http.MethodGet,
-			"http://host.com/page#1?custom=1&page=4&per_page=20",
+			"http://host.com/page#anchor?custom=1&page=4&per_page=20",
 			strings.NewReader(""),
 		),
 	)
+
+	fmt.Println(recorder.Header().Get("Link"))
 
 	// Output:
 	// page 4
 	// perPage 20
 	// offset 60
 	// limit 80
+	// <http://host.com/page%23anchor?custom=1&page=4&per_page=20> rel="next", <http://host.com/page%23anchor?custom=1&page=4&per_page=20> rel="prev", <http://host.com/page%23anchor?custom=1&page=4&per_page=20> rel="first", <http://host.com/page%23anchor?custom=1&page=4&per_page=20> rel="last"
 }
 
 func TestPaginator_Middleware(t *testing.T) {
@@ -51,7 +56,7 @@ func TestPaginator_Middleware(t *testing.T) {
 			name:               "Default config without params",
 			config:             Config{},
 			target:             "http://host.com/page",
-			expectedPagination: &Pagination{page: 1, perPage: 0},
+			expectedPagination: &Pagination{page: 1, perPage: 100},
 		},
 		{
 			name:               "Default config with params",
